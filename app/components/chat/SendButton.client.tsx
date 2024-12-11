@@ -1,39 +1,32 @@
-import { AnimatePresence, cubicBezier, motion } from 'framer-motion';
+import { IconButton } from '../ui/IconButton';
 
-interface SendButtonProps {
-  show: boolean;
-  isStreaming?: boolean;
-  disabled?: boolean;
-  onClick?: (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void;
-  onImagesSelected?: (images: File[]) => void;
+export interface SendButtonProps {
+  disabled: boolean;
+  onClick: (e: React.MouseEvent<HTMLButtonElement>) => Promise<void>;
+  isStreaming: boolean;
+  onStop: () => void;
 }
 
-const customEasingFn = cubicBezier(0.4, 0, 0.2, 1);
-
-export const SendButton = ({ show, isStreaming, disabled, onClick }: SendButtonProps) => {
+export function SendButton({ disabled, onClick, isStreaming, onStop }: SendButtonProps) {
   return (
-    <AnimatePresence>
-      {show ? (
-        <motion.button
-          className="absolute flex justify-center items-center top-[18px] right-[22px] p-1 bg-accent-500 hover:brightness-94 color-white rounded-md w-[34px] h-[34px] transition-theme disabled:opacity-50 disabled:cursor-not-allowed"
-          transition={{ ease: customEasingFn, duration: 0.17 }}
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: 10 }}
-          disabled={disabled}
-          onClick={(event) => {
-            event.preventDefault();
-
-            if (!disabled) {
-              onClick?.(event);
-            }
-          }}
-        >
-          <div className="text-lg">
-            {!isStreaming ? <div className="i-ph:arrow-right"></div> : <div className="i-ph:stop-circle-bold"></div>}
-          </div>
-        </motion.button>
-      ) : null}
-    </AnimatePresence>
+    <IconButton
+      disabled={disabled}
+      onClick={isStreaming ? onStop : onClick}
+      className={`transition-colors ${
+        disabled
+          ? 'text-zeus-dark-text-secondary opacity-50'
+          : isStreaming
+          ? 'text-zeus-gold hover:text-zeus-gold/80'
+          : 'text-zeus-lightning hover:text-zeus-lightning/80'
+      }`}
+      title={isStreaming ? 'Stop generating' : 'Send message'}
+    >
+      {isStreaming ? (
+        <div className="i-ph:stop-circle text-xl" aria-hidden="true" />
+      ) : (
+        <div className="i-ph:paper-plane-right text-xl" aria-hidden="true" />
+      )}
+      <span className="sr-only">{isStreaming ? 'Stop generating' : 'Send message'}</span>
+    </IconButton>
   );
-};
+}

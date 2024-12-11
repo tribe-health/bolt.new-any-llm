@@ -8,16 +8,19 @@ import { db, chatId } from '~/lib/persistence/useChatHistory';
 import { forkChat } from '~/lib/persistence/db';
 import { toast } from 'react-toastify';
 import WithTooltip from '~/components/ui/Tooltip';
+import { convertToCustomMessage } from '~/types/message';
 
 interface MessagesProps {
   id?: string;
   className?: string;
   isStreaming?: boolean;
   messages?: Message[];
+  messageRef?: React.RefCallback<HTMLDivElement>;
+  scrollRef?: React.RefCallback<HTMLDivElement>;
 }
 
 export const Messages = React.forwardRef<HTMLDivElement, MessagesProps>((props: MessagesProps, ref) => {
-  const { id, isStreaming = false, messages = [] } = props;
+  const { id, isStreaming = false, messages = [], messageRef, scrollRef } = props;
   const location = useLocation();
 
   const handleRewind = (messageId: string) => {
@@ -41,7 +44,11 @@ export const Messages = React.forwardRef<HTMLDivElement, MessagesProps>((props: 
   };
 
   return (
-    <div id={id} ref={ref} className={props.className}>
+    <div 
+      id={id} 
+      ref={ref} 
+      className={classNames('w-full space-y-4 overflow-y-auto px-4', props.className)}
+    >
       {messages.length > 0
         ? messages.map((message, index) => {
             const { role, content, id: messageId } = message;
@@ -52,7 +59,8 @@ export const Messages = React.forwardRef<HTMLDivElement, MessagesProps>((props: 
             return (
               <div
                 key={index}
-                className={classNames('flex gap-4 p-6 w-full rounded-[calc(0.75rem-1px)]', {
+                ref={isLast ? messageRef : undefined}
+                className={classNames('flex gap-4 p-6 w-full rounded-lg', {
                   'bg-bolt-elements-messages-background': isUserMessage || !isStreaming || (isStreaming && !isLast),
                   'bg-gradient-to-b from-bolt-elements-messages-background from-30% to-transparent':
                     isStreaming && isLast,
@@ -61,36 +69,40 @@ export const Messages = React.forwardRef<HTMLDivElement, MessagesProps>((props: 
               >
                 {isUserMessage && (
                   <div className="flex items-center justify-center w-[34px] h-[34px] overflow-hidden bg-white text-gray-600 rounded-full shrink-0 self-start">
-                    <div className="i-ph:user-fill text-xl"></div>
+                    <div className="i-ph:user-fill text-xl" aria-label="User avatar" />
                   </div>
                 )}
                 <div className="grid grid-col-1 w-full">
                   {isUserMessage ? <UserMessage content={content} /> : <AssistantMessage content={content} />}
                 </div>
-                {!isUserMessage && (
+                {!isUserMessage && messageId && (
                   <div className="flex gap-2 flex-col lg:flex-row">
                     <WithTooltip tooltip="Revert to this message">
-                      {messageId && (
-                        <button
-                          onClick={() => handleRewind(messageId)}
-                          key="i-ph:arrow-u-up-left"
-                          className={classNames(
-                            'i-ph:arrow-u-up-left',
-                            'text-xl text-bolt-elements-textSecondary hover:text-bolt-elements-textPrimary transition-colors',
-                          )}
-                        />
-                      )}
+                      <button
+                        onClick={() => handleRewind(messageId)}
+                        className={classNames(
+                          'i-ph:arrow-u-up-left',
+                          'text-xl text-bolt-elements-textSecondary hover:text-bolt-elements-textPrimary transition-colors',
+                        )}
+                        aria-label="Revert to this message"
+                        title="Revert to this message"
+                      >
+                        <span className="sr-only">Revert to this message</span>
+                      </button>
                     </WithTooltip>
 
                     <WithTooltip tooltip="Fork chat from this message">
                       <button
                         onClick={() => handleFork(messageId)}
-                        key="i-ph:git-fork"
                         className={classNames(
                           'i-ph:git-fork',
                           'text-xl text-bolt-elements-textSecondary hover:text-bolt-elements-textPrimary transition-colors',
                         )}
-                      />
+                        aria-label="Fork chat from this message"
+                        title="Fork chat from this message"
+                      >
+                        <span className="sr-only">Fork chat from this message</span>
+                      </button>
                     </WithTooltip>
                   </div>
                 )}
@@ -99,7 +111,10 @@ export const Messages = React.forwardRef<HTMLDivElement, MessagesProps>((props: 
           })
         : null}
       {isStreaming && (
-        <div className="text-center w-full text-bolt-elements-textSecondary i-svg-spinners:3-dots-fade text-4xl mt-4"></div>
+        <div 
+          className="text-center w-full text-bolt-elements-textSecondary i-svg-spinners:3-dots-fade text-4xl mt-4" 
+          aria-label="Loading messages"
+        />
       )}
     </div>
   );

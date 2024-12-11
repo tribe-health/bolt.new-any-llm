@@ -31,7 +31,8 @@ export const description = atom<string | undefined>(undefined);
 
 export function useChatHistory() {
   const navigate = useNavigate();
-  const { id: mixedId } = useLoaderData<{ id?: string }>();
+  const loaderData = useLoaderData<{ id?: string }>();
+  const mixedId = loaderData?.id;
   const [searchParams] = useSearchParams();
 
   const [initialMessages, setInitialMessages] = useState<Message[]>([]);
@@ -71,6 +72,8 @@ export function useChatHistory() {
         .catch((error) => {
           toast.error(error.message);
         });
+    } else {
+      setReady(true);
     }
   }, []);
 

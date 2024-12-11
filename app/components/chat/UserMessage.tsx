@@ -1,53 +1,38 @@
-/*
- * @ts-nocheck
- * Preventing TS checks with files presented in the video for a better presentation.
- */
-import { MODEL_REGEX, PROVIDER_REGEX } from '~/utils/constants';
+import { memo } from 'react';
 import { Markdown } from './Markdown';
+import type { MessageContent } from '~/types/message';
 
 interface UserMessageProps {
-  content: string | Array<{ type: string; text?: string; image?: string }>;
+  content: string | MessageContent[];
 }
 
-export function UserMessage({ content }: UserMessageProps) {
-  if (Array.isArray(content)) {
-    const textItem = content.find((item) => item.type === 'text');
-    const textContent = sanitizeUserMessage(textItem?.text || '');
-    const images = content.filter((item) => item.type === 'image' && item.image);
+export const UserMessage = memo(function UserMessage({ content }: UserMessageProps) {
+  if (typeof content === 'string') {
+    return <Markdown content={content} />;
+  }
 
+  if (Array.isArray(content)) {
     return (
-      <div className="overflow-hidden pt-[4px]">
-        <div className="flex items-start gap-4">
-          <div className="flex-1">
-            <Markdown limitedMarkdown>{textContent}</Markdown>
-          </div>
-          {images.length > 0 && (
-            <div className="flex-shrink-0 w-[160px]">
-              {images.map((item, index) => (
-                <div key={index} className="relative">
-                  <img
-                    src={item.image}
-                    alt={`Uploaded image ${index + 1}`}
-                    className="w-full h-[160px] rounded-lg object-cover border border-bolt-elements-borderColor"
-                  />
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
+      <div className="flex flex-col gap-4">
+        {content.map((part, index) => {
+          if (part.type === 'text' && part.text) {
+            return <Markdown key={index} content={part.text} />;
+          }
+          if (part.type === 'image' && part.image) {
+            return (
+              <img
+                key={index}
+                src={part.image}
+                alt="User uploaded image"
+                className="max-w-full h-auto rounded-lg"
+              />
+            );
+          }
+          return null;
+        })}
       </div>
     );
   }
 
-  const textContent = sanitizeUserMessage(content);
-
-  return (
-    <div className="overflow-hidden pt-[4px]">
-      <Markdown limitedMarkdown>{textContent}</Markdown>
-    </div>
-  );
-}
-
-function sanitizeUserMessage(content: string) {
-  return content.replace(MODEL_REGEX, '').replace(PROVIDER_REGEX, '');
-}
+  return null;
+});

@@ -39,20 +39,20 @@ You are Bolt, an expert AI assistant and exceptional senior software developer w
       - rm: Remove files
       - rmdir: Remove empty directories
       - touch: Create empty file/update timestamp
-    
+
     System Information:
       - hostname: Show system name
       - ps: Display running processes
       - pwd: Print working directory
       - uptime: Show system uptime
       - env: Environment variables
-    
+
     Development Tools:
       - node: Execute Node.js code
       - python3: Run Python scripts
       - code: VSCode operations
       - jq: Process JSON
-    
+
     Other Utilities:
       - curl, head, sort, tail, clear, which, export, chmod, scho, hostname, kill, ln, xxd, alias, false,  getconf, true, loadenv, wasm, xdg-open, command, exit, source
 </system_constraints>
@@ -124,7 +124,7 @@ You are Bolt, an expert AI assistant and exceptional senior software developer w
   2. Create TodoList and TodoItem components
   3. Implement localStorage for persistence
   4. Add CRUD operations
-  
+
   Let's start now.
 
   [Rest of response...]"
@@ -134,7 +134,7 @@ You are Bolt, an expert AI assistant and exceptional senior software developer w
   1. Check network requests
   2. Verify API endpoint format
   3. Examine error handling
-  
+
   [Rest of response...]"
 
 </chain_of_thought_instructions>
@@ -299,15 +299,15 @@ Here are some examples of correct usage of artifacts:
               "preview": "vite preview"
             },
             "dependencies": {
-              "react": "^18.2.0",
-              "react-dom": "^18.2.0",
-              "react-spring": "^9.7.1"
+              "react": "^19.0.0",
+              "react-dom": "^19.0.0",
+              "react-spring": "^9.7.4"
             },
             "devDependencies": {
-              "@types/react": "^18.0.28",
-              "@types/react-dom": "^18.0.11",
-              "@vitejs/plugin-react": "^3.1.0",
-              "vite": "^4.2.0"
+              "@types/react": "^19.0.0",
+              "@types/react-dom": "^19.0.0",
+              "@vitejs/plugin-react": "^4.3.4",
+              "vite": "^6.0.3"
             }
           }
         </boltAction>

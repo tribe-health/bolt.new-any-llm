@@ -1,13 +1,19 @@
-import WithTooltip from '~/components/ui/Tooltip';
+import { memo } from 'react';
 import { IconButton } from '~/components/ui/IconButton';
-import React from 'react';
 
-export const ExportChatButton = ({ exportChat }: { exportChat?: () => void }) => {
+interface ExportChatButtonProps {
+  exportChat: () => void;
+}
+
+export const ExportChatButton = memo(function ExportChatButton({ exportChat }: ExportChatButtonProps) {
   return (
-    <WithTooltip tooltip="Export Chat">
-      <IconButton title="Export Chat" onClick={() => exportChat?.()}>
-        <div className="i-ph:download-simple text-xl"></div>
-      </IconButton>
-    </WithTooltip>
+    <IconButton
+      title="Export chat"
+      className="text-bolt-elements-textSecondary hover:text-bolt-elements-textPrimary transition-colors"
+      onClick={exportChat}
+    >
+      <div className="i-ph:export text-xl" aria-hidden="true" />
+      <span className="sr-only">Export chat</span>
+    </IconButton>
   );
-};
+});

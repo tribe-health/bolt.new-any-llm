@@ -1,4 +1,4 @@
-interface OllamaModelDetails {
+export interface OllamaModelDetails {
   parent_model: string;
   format: string;
   family: string;
@@ -28,10 +28,29 @@ export interface ModelInfo {
 }
 
 export interface ProviderInfo {
-  staticModels: ModelInfo[];
   name: string;
+  staticModels: ModelInfo[];
   getDynamicModels?: () => Promise<ModelInfo[]>;
   getApiKeyLink?: string;
   labelForGetApiKey?: string;
   icon?: string;
+}
+
+export interface ChatMessage {
+  role: 'user' | 'assistant';
+  content: string | Array<{ type: string; text?: string; image?: string }>;
+  id?: string;
+}
+
+export interface ChatStore {
+  started: boolean;
+  aborted: boolean;
+  showChat: boolean;
+}
+
+export interface WorkbenchStore {
+  files: Record<string, string>;
+  modifications: Record<string, string>;
+  saveAllFiles: () => Promise<void>;
+  getFileModifcations: () => Record<string, string> | undefined;
 }

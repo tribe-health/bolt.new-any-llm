@@ -5,7 +5,13 @@ interface WebContainerContext {
   loaded: boolean;
 }
 
-export const webcontainerContext: WebContainerContext = import.meta.hot?.data.webcontainerContext ?? {
+declare global {
+  interface ImportMetaHot {
+    data: Record<string, any>;
+  }
+}
+
+export const webcontainerContext: WebContainerContext = (import.meta.hot?.data.webcontainerContext as WebContainerContext) ?? {
   loaded: false,
 };
 
@@ -19,10 +25,12 @@ export let webcontainer: Promise<WebContainer> = new Promise(() => {
 
 if (!import.meta.env.SSR) {
   webcontainer =
-    import.meta.hot?.data.webcontainer ??
+    (import.meta.hot?.data.webcontainer as Promise<WebContainer>) ??
     Promise.resolve()
       .then(() => {
-        return WebContainer.boot({ workdirName: WORK_DIR_NAME });
+        return WebContainer.boot({
+          workdirName: WORK_DIR_NAME,
+        });
       })
       .then((webcontainer) => {
         webcontainerContext.loaded = true;

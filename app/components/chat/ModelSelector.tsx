@@ -1,132 +1,156 @@
-import type { ProviderInfo } from '~/types/model';
-import type { ModelInfo } from '~/utils/types';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
+import { MODEL_LIST, PROVIDER_LIST } from '~/utils/constants';
+import type { ProviderInfo } from '~/utils/types';
 import Cookies from 'js-cookie';
+import { APIKeyDialog } from './APIKeyDialog';
+import { Loader2 } from 'lucide-react';
 
-interface ModelSelectorProps {
-  model?: string;
-  setModel?: (model: string) => void;
-  provider?: ProviderInfo;
-  setProvider?: (provider: ProviderInfo) => void;
-  modelList: ModelInfo[];
-  providerList: ProviderInfo[];
-  apiKeys: Record<string, string>;
+export interface ModelSelectorProps {
+  model: string;
+  setModel: (model: string) => void;
+  provider: ProviderInfo;
+  setProvider: (provider: ProviderInfo) => void;
+  modelList?: typeof MODEL_LIST;
+  apiKeys?: Record<string, string>;
+  isLoading?: boolean;
 }
 
-export const ModelSelector = ({
+export function ModelSelector({
   model,
   setModel,
   provider,
   setProvider,
-  modelList,
-  providerList,
-}: ModelSelectorProps) => {
-  // Load enabled providers from cookies
-  const [enabledProviders, setEnabledProviders] = useState(() => {
-    const savedProviders = Cookies.get('providers');
+  modelList = MODEL_LIST,
+  apiKeys = {},
+  isLoading = false,
+}: ModelSelectorProps) {
+  const [showApiKeyInput, setShowApiKeyInput] = useState(false);
+  const [apiKey, setApiKey] = useState('');
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const filteredModels = modelList.filter((m) => m.provider === provider.name);
 
-    if (savedProviders) {
-      try {
-        const parsedProviders = JSON.parse(savedProviders);
-        return providerList.filter((p) => parsedProviders[p.name]);
-      } catch (error) {
-        console.error('Failed to parse providers from cookies:', error);
-        return providerList;
+  const handleSaveApiKey = () => {
+    const updatedKeys = { ...apiKeys, [provider.name]: apiKey };
+    Cookies.set('apiKeys', JSON.stringify(updatedKeys));
+    setShowApiKeyInput(false);
+    setApiKey('');
+  };
+
+  const handleProviderChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const newProvider = PROVIDER_LIST.find(p => p.name === e.target.value);
+    if (newProvider) {
+      setProvider(newProvider);
+      const firstModel = modelList.find(m => m.provider === newProvider.name);
+      if (firstModel) {
+        setModel(firstModel.name);
       }
     }
+  };
 
-    return providerList;
-  });
-
-  // Update enabled providers when cookies change
-  useEffect(() => {
-    // Function to update providers from cookies
-    const updateProvidersFromCookies = () => {
-      const savedProviders = Cookies.get('providers');
-
-      if (savedProviders) {
-        try {
-          const parsedProviders = JSON.parse(savedProviders);
-          const newEnabledProviders = providerList.filter((p) => parsedProviders[p.name]);
-          setEnabledProviders(newEnabledProviders);
-
-          // If current provider is disabled, switch to first enabled provider
-          if (provider && !parsedProviders[provider.name] && newEnabledProviders.length > 0) {
-            const firstEnabledProvider = newEnabledProviders[0];
-            setProvider?.(firstEnabledProvider);
-
-            // Also update the model to the first available one for the new provider
-            const firstModel = modelList.find((m) => m.provider === firstEnabledProvider.name);
-
-            if (firstModel) {
-              setModel?.(firstModel.name);
-            }
-          }
-        } catch (error) {
-          console.error('Failed to parse providers from cookies:', error);
-        }
-      }
-    };
-
-    // Initial update
-    updateProvidersFromCookies();
-
-    // Set up an interval to check for cookie changes
-    const interval = setInterval(updateProvidersFromCookies, 1000);
-
-    return () => clearInterval(interval);
-  }, [providerList, provider, setProvider, modelList, setModel]);
-
-  if (enabledProviders.length === 0) {
-    return (
-      <div className="mb-2 p-4 rounded-lg border border-bolt-elements-borderColor bg-bolt-elements-prompt-background text-bolt-elements-textPrimary">
-        <p className="text-center">
-          No providers are currently enabled. Please enable at least one provider in the settings to start using the
-          chat.
-        </p>
-      </div>
-    );
-  }
+  const handleApiKeySave = (config: Record<string, string>) => {
+    // Handle saving API key configuration
+    console.log('Saving API key config:', config);
+  };
 
   return (
-    <div className="mb-2 flex gap-2 flex-col sm:flex-row">
-      <select
-        value={provider?.name ?? ''}
-        onChange={(e) => {
-          const newProvider = enabledProviders.find((p: ProviderInfo) => p.name === e.target.value);
+    <div className="flex flex-col gap-4 w-full max-w-4xl mx-auto px-4">
+      <div className="flex gap-4 w-full">
+        <div className="flex-1">
+          <label htmlFor="provider-select" className="text-sm text-zeus-dark-text-secondary">
+            Provider
+          </label>
+          <select
+            id="provider-select"
+            value={provider.name}
+            onChange={handleProviderChange}
+            className="w-full mt-1 rounded-lg border border-zeus-dark-border bg-zeus-dark-background px-3 py-2 text-sm text-zeus-dark-text-primary focus:outline-none focus:ring-2 focus:ring-zeus-lightning"
+            disabled={isLoading}
+          >
+            {PROVIDER_LIST.map((p) => (
+              <option key={p.name} value={p.name}>
+                {p.name}
+              </option>
+            ))}
+          </select>
+        </div>
 
-          if (newProvider && setProvider) {
-            setProvider(newProvider);
-          }
+        <div className="flex-1">
+          <label htmlFor="model-select" className="text-sm text-zeus-dark-text-secondary">
+            Model
+          </label>
+          <select
+            id="model-select"
+            value={model}
+            onChange={(e) => setModel(e.target.value)}
+            className="w-full mt-1 rounded-lg border border-zeus-dark-border bg-zeus-dark-background px-3 py-2 text-sm text-zeus-dark-text-primary focus:outline-none focus:ring-2 focus:ring-zeus-lightning"
+            disabled={isLoading}
+          >
+            {isLoading ? (
+              <option value="">Loading models...</option>
+            ) : (
+              filteredModels.map((m) => (
+                <option key={m.name} value={m.name}>
+                  {m.label}
+                </option>
+              ))
+            )}
+          </select>
+        </div>
 
-          const firstModel = [...modelList].find((m) => m.provider === e.target.value);
+        <div className="flex items-end">
+          {!apiKeys[provider.name] ? (
+            <button
+              onClick={() => setIsDialogOpen(true)}
+              className="w-32 rounded-lg border border-zeus-dark-border bg-zeus-dark-background px-3 py-2 text-sm text-zeus-dark-text-primary hover:bg-zeus-dark-background-hover"
+              disabled={isLoading}
+            >
+              {isLoading ? (
+                <Loader2 className="w-4 h-4 animate-spin" />
+              ) : (
+                'Add API Key'
+              )}
+            </button>
+          ) : (
+            <button
+              onClick={() => window.open(provider.getApiKeyLink, '_blank')}
+              className="w-32 rounded-lg border border-zeus-dark-border bg-zeus-dark-background px-3 py-2 text-sm text-zeus-dark-text-primary hover:bg-zeus-dark-background-hover"
+            >
+              Get API Key
+            </button>
+          )}
+        </div>
+      </div>
 
-          if (firstModel && setModel) {
-            setModel(firstModel.name);
-          }
-        }}
-        className="flex-1 p-2 rounded-lg border border-bolt-elements-borderColor bg-bolt-elements-prompt-background text-bolt-elements-textPrimary focus:outline-none focus:ring-2 focus:ring-bolt-elements-focus transition-all"
-      >
-        {enabledProviders.map((provider: ProviderInfo) => (
-          <option key={provider.name} value={provider.name}>
-            {provider.name}
-          </option>
-        ))}
-      </select>
-      <select
-        key={provider?.name}
-        value={model}
-        onChange={(e) => setModel?.(e.target.value)}
-        className="flex-1 p-2 rounded-lg border border-bolt-elements-borderColor bg-bolt-elements-prompt-background text-bolt-elements-textPrimary focus:outline-none focus:ring-2 focus:ring-bolt-elements-focus transition-all lg:max-w-[70%]"
-      >
-        {[...modelList]
-          .filter((e) => e.provider == provider?.name && e.name)
-          .map((modelOption) => (
-            <option key={modelOption.name} value={modelOption.name}>
-              {modelOption.label}
-            </option>
-          ))}
-      </select>
+      {showApiKeyInput && (
+        <div className="flex gap-2">
+          <input
+            type="password"
+            value={apiKey}
+            onChange={(e) => setApiKey(e.target.value)}
+            placeholder="Enter API Key"
+            className="flex-1 rounded-lg border border-zeus-dark-border bg-zeus-dark-background px-3 py-2 text-sm text-zeus-dark-text-primary focus:outline-none focus:ring-2 focus:ring-zeus-lightning"
+          />
+          <button
+            onClick={handleSaveApiKey}
+            className="w-20 rounded-lg border border-zeus-dark-border bg-zeus-dark-background px-3 py-2 text-sm text-zeus-dark-text-primary hover:bg-zeus-dark-background-hover"
+          >
+            Save
+          </button>
+          <button
+            onClick={() => setShowApiKeyInput(false)}
+            className="w-20 rounded-lg border border-zeus-dark-border bg-zeus-dark-background px-3 py-2 text-sm text-zeus-dark-text-primary hover:bg-zeus-dark-background-hover"
+          >
+            Cancel
+          </button>
+        </div>
+      )}
+
+      <APIKeyDialog
+        isOpen={isDialogOpen}
+        onClose={() => setIsDialogOpen(false)}
+        provider={provider}
+        onSave={handleApiKeySave}
+      />
     </div>
   );
-};
+}

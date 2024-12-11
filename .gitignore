@@ -1,3 +1,4 @@
+# Logs
 logs
 *.log
 npm-debug.log*
@@ -6,14 +7,32 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
+# Dependencies
 node_modules
+.pnp
+.pnp.js
+
+# Testing
+coverage
+test-results/
+playwright-report/
+blob-report/
+playwright/.cache/
+
+# Production
 dist
 dist-ssr
 *.local
+build/
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
 
+# Editor directories and files
 .vscode/*
-.vscode/launch.json
 !.vscode/extensions.json
+!.vscode/settings.json
 .idea
 .DS_Store
 *.suo
@@ -22,18 +41,16 @@ dist-ssr
 *.sln
 *.sw?
 
-/.history
+# TypeScript
+*.tsbuildinfo
+next-env.d.ts
+
+# Remix specific
 /.cache
 /build
-.env.local
-.env
-.dev.vars
-*.vars
-.wrangler
-_worker.bundle
+/public/build
+/api/index.js
+/api/index.js.map
 
-Modelfile
-modelfiles
-
-# docs ignore
-site
+# Vite
+.vite

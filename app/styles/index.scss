@@ -1,24 +1,79 @@
-@use 'variables.scss';
-@use 'z-index.scss';
-@use 'animations.scss';
-@use 'components/terminal.scss';
-@use 'components/resize-handle.scss';
-@use 'components/code.scss';
-@use 'components/editor.scss';
-@use 'components/toast.scss';
+@forward './animations.scss';
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --font-sans: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI',
+    Roboto, 'Helvetica Neue', Arial, 'Noto Sans', sans-serif, 'Apple Color Emoji',
+    'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
+    'Liberation Mono', 'Courier New', monospace;
+
+  --bolt-elements-background-depth-1: #ffffff;
+  --bolt-elements-background-depth-2: #f5f5f5;
+  --bolt-elements-background-depth-3: #e5e5e5;
+  --bolt-elements-borderColor: #e5e5e5;
+  --bolt-elements-textPrimary: #1a1a1a;
+  --bolt-elements-textSecondary: #666666;
+  --bolt-elements-accent: #007bff;
+  --bolt-elements-focus: #007bff;
+  --bolt-elements-prompt-background: #f8f9fa;
+  --bolt-elements-messages-background: #ffffff;
+  --bolt-elements-icon-success: #28a745;
+  --bolt-elements-icon-error: #dc3545;
+}
+
+[data-theme='dark'] {
+  --bolt-elements-background-depth-1: #1a1a1a;
+  --bolt-elements-background-depth-2: #2d2d2d;
+  --bolt-elements-background-depth-3: #404040;
+  --bolt-elements-borderColor: #404040;
+  --bolt-elements-textPrimary: #ffffff;
+  --bolt-elements-textSecondary: #a3a3a3;
+  --bolt-elements-accent: #3b82f6;
+  --bolt-elements-focus: #3b82f6;
+  --bolt-elements-prompt-background: #2d2d2d;
+  --bolt-elements-messages-background: #2d2d2d;
+  --bolt-elements-icon-success: #34d399;
+  --bolt-elements-icon-error: #ef4444;
+}
 
 html,
 body {
   height: 100%;
-  width: 100%;
+  margin: 0;
+  padding: 0;
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background-color: var(--bolt-elements-background-depth-1);
+  color: var(--bolt-elements-textPrimary);
 }
 
-:root {
-  --gradient-opacity: 0.8;
-  --primary-color: rgba(158, 117, 240, var(--gradient-opacity));
-  --secondary-color: rgba(138, 43, 226, var(--gradient-opacity));
-  --accent-color: rgba(128, 59, 239, var(--gradient-opacity));
-  // --primary-color: rgba(147, 112, 219, var(--gradient-opacity));
-  // --secondary-color: rgba(138, 43, 226, var(--gradient-opacity));
-  // --accent-color: rgba(180, 170, 220, var(--gradient-opacity));
+#root {
+  height: 100%;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--bolt-elements-borderColor);
+  border-radius: 5px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--bolt-elements-textSecondary);
 }

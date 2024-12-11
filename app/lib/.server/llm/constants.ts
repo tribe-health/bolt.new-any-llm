@@ -1,5 +1,8 @@
-// see https://docs.anthropic.com/en/docs/about-claude/models
-export const MAX_TOKENS = 8000;
+// Maximum number of tokens to generate in a response
+export const MAX_TOKENS = 4096;
 
-// limits the number of model responses that can be returned in a single request
-export const MAX_RESPONSE_SEGMENTS = 2;
+// Maximum number of response segments when continuing a response
+export const MAX_RESPONSE_SEGMENTS = 10;
+
+// Maximum number of messages to keep in history
+export const MAX_MESSAGES = 100;
